@@ -16,44 +16,46 @@ export default async function handler(request, response) {
       return response.status(400).json({ message: "Question and dashboard data are required." });
     }
 
-    const prompt = `<s>[INST]
-You are the OrbitWire dashboard assistant. Answer only from the DASHBOARD_DATA JSON.
-If the answer is not present in the dashboard data, say: "I can only answer from the current dashboard data."
-Do not use outside knowledge. Keep answers brief and helpful.
-
-DASHBOARD_DATA:
-${JSON.stringify(dashboardData).slice(0, 12000)}
-
-QUESTION:
-${question}
-[/INST]`;
-
-    const hfResponse = await fetch(`https://api-inference.huggingface.co/models/${HF_MODEL}`, {
+    const hfResponse = await fetch("https://router.huggingface.co/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        inputs: prompt,
-        parameters: {
-          max_new_tokens: 220,
-          temperature: 0.2,
-          return_full_text: false
-        }
+        model: HF_MODEL,
+        stream: false,
+        max_tokens: 220,
+        temperature: 0.2,
+        messages: [
+          {
+            role: "system",
+            content:
+              'You are the OrbitWire dashboard assistant. Answer only from the DASHBOARD_DATA JSON. If the answer is not present, say: "I can only answer from the current dashboard data." Do not use outside knowledge. Keep answers brief.'
+          },
+          {
+            role: "user",
+            content: `DASHBOARD_DATA:\n${JSON.stringify(dashboardData).slice(0, 12000)}\n\nQUESTION:\n${question}`
+          }
+        ]
       })
     });
 
-    const data = await hfResponse.json();
+    const raw = await hfResponse.text();
+    let data;
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      data = { error: raw.slice(0, 180) };
+    }
+
     if (!hfResponse.ok) {
       return response.status(hfResponse.status).json({
         message: data.error || "Hugging Face request failed."
       });
     }
 
-    const answer = Array.isArray(data)
-      ? data[0]?.generated_text
-      : data.generated_text || data[0]?.generated_text;
+    const answer = data.choices?.[0]?.message?.content;
 
     return response.status(200).json({
       answer: (answer || "I can only answer from the current dashboard data.").trim()
