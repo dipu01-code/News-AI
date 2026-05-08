@@ -42,6 +42,15 @@ const markerIcon = L.divIcon({
   iconAnchor: [27, 27]
 });
 
+function readableMessage(value, fallback = "Something went wrong.") {
+  if (!value) return fallback;
+  if (typeof value === "string") return value;
+  if (typeof value === "object") {
+    return value.message || value.error || value.detail || JSON.stringify(value);
+  }
+  return String(value);
+}
+
 function useTheme() {
   const [theme, setTheme] = useState(() => localStorage.getItem("theme") || "dark");
   useEffect(() => {
@@ -296,11 +305,11 @@ function Dashboard() {
         })
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Chat failed.");
+      if (!response.ok) throw new Error(readableMessage(data.message || data.error, "Chat failed."));
       setMessages((items) => [...items, { role: "assistant", content: data.answer }].slice(-30));
     } catch (error) {
       setMessages((items) =>
-        [...items, { role: "assistant", content: `Error: ${error.message}` }].slice(-30)
+        [...items, { role: "assistant", content: `Error: ${readableMessage(error.message)}` }].slice(-30)
       );
     } finally {
       setIsTyping(false);
