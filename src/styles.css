@@ -714,18 +714,150 @@ p {
 }
 
 .mission-donut-card {
+  display: flex;
+  flex-direction: column;
   min-height: 430px;
+  background:
+    radial-gradient(circle at 50% 36%, rgba(0, 229, 255, 0.12), transparent 13rem),
+    linear-gradient(145deg, rgba(37, 25, 44, 0.9), rgba(17, 11, 24, 0.92));
+}
+
+.intel-module-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.intel-module-head h2 {
+  margin: 0;
+  font-size: 1.9rem;
+}
+
+.intel-module-head > span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: rgba(220, 177, 255, 0.09);
+  color: var(--accent);
+  font-family: "SFMono-Regular", ui-monospace, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 .mission-donut {
+  position: relative;
   display: grid;
   place-items: center;
-  height: 300px;
-  margin-top: 18px;
+  height: 230px;
+  margin-top: 14px;
 }
 
 .mission-donut canvas {
-  max-height: 280px;
+  max-height: 220px;
+  filter: drop-shadow(0 0 24px rgba(0, 229, 255, 0.16));
+}
+
+.donut-core {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  display: grid;
+  place-items: center;
+  transform: translate(-50%, -50%);
+}
+
+.donut-core strong {
+  color: var(--text);
+  font-size: 2.25rem;
+  line-height: 1;
+}
+
+.donut-core span {
+  color: var(--muted);
+  font-family: "SFMono-Regular", ui-monospace, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.intel-breakdown {
+  display: grid;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.intel-breakdown button {
+  display: grid;
+  grid-template-columns: 14px 1fr auto auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--text);
+  text-align: left;
+}
+
+.intel-breakdown button.active,
+.intel-breakdown button:hover {
+  border-color: var(--cyan);
+}
+
+.intel-breakdown i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.science-dot {
+  background: #5d8cff;
+}
+
+.tech-dot {
+  background: #efc66b;
+}
+
+.intel-breakdown span,
+.intel-breakdown strong,
+.intel-breakdown em {
+  font-family: "SFMono-Regular", ui-monospace, monospace;
+  font-size: 0.78rem;
+  font-style: normal;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.intel-breakdown strong {
+  color: var(--cyan);
+}
+
+.intel-breakdown em {
+  color: var(--muted);
+}
+
+.intel-module-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.intel-module-actions button {
+  min-height: 38px;
+  border: 1px solid var(--line-strong);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.045);
+  color: var(--text);
+  font-family: "SFMono-Regular", ui-monospace, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .mission-crew-card {

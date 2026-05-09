@@ -455,10 +455,49 @@ function Dashboard() {
         </article>
 
         <article className="command-card mission-donut-card">
-          <p className="eyebrow">Intel_Distribution</p>
-          <h2>News Intel</h2>
+          <div className="intel-module-head">
+            <div>
+              <p className="eyebrow">Intel_Distribution</p>
+              <h2>News Intel</h2>
+            </div>
+            <span>{articles.length || 0} live</span>
+          </div>
           <div className="mission-donut">
-            <Doughnut data={distributionData} options={{ plugins: { legend: { position: "bottom" } } }} />
+            <Doughnut
+              data={distributionData}
+              options={{
+                cutout: "68%",
+                plugins: { legend: { display: false } }
+              }}
+            />
+            <div className="donut-core">
+              <strong>{articles.length || 0}</strong>
+              <span>Events</span>
+            </div>
+          </div>
+          <div className="intel-breakdown">
+            {NEWS_CATEGORIES.map((category, index) => {
+              const count = newsByCategory[category]?.length || 0;
+              const percent = articles.length ? Math.round((count / articles.length) * 100) : 0;
+              return (
+                <button
+                  key={category}
+                  className={activeCategory === category ? "active" : ""}
+                  onClick={() => setActiveCategory(category)}
+                >
+                  <i className={index === 0 ? "science-dot" : "tech-dot"} />
+                  <span>{category}</span>
+                  <strong>{count}</strong>
+                  <em>{percent}%</em>
+                </button>
+              );
+            })}
+          </div>
+          <div className="intel-module-actions">
+            <button onClick={() => setActiveCategory("all")}>All_Intel</button>
+            <button onClick={() => NEWS_CATEGORIES.forEach((category) => fetchNews(category, true))}>
+              Refresh_Feed
+            </button>
           </div>
         </article>
       </div>
