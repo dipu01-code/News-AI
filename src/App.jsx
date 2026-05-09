@@ -428,101 +428,124 @@ function Dashboard() {
   );
 
   const newsPage = (
-    <section className="command-card news-panel route-page">
-      <div className="section-title news-title">
+    <section className="intel-page route-page">
+      <header className="intel-header">
         <div>
-          <p className="eyebrow">Orbital Intelligence</p>
-          <h2>News Hub</h2>
+          <h2>Orbital Intelligence</h2>
+          <p>Central intelligence feed for science and technology signals.</p>
         </div>
-        <div className="news-controls">
-          <label className="search-box">
-            <Search size={16} />
-            <input
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search intel"
-            />
-          </label>
-          <select value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
-            <option value="date">Sort by date</option>
-            <option value="source">Sort by source</option>
-          </select>
+        <div className="intel-tools">
+          {NEWS_CATEGORIES.map((category) => (
+            <button
+              key={category}
+              className={activeCategory === category ? "active" : ""}
+              onClick={() => setActiveCategory(category)}
+            >
+              {category === "science" ? "Telemetry Deviations" : "Deep Space Network"}
+            </button>
+          ))}
+          <button onClick={() => setActiveCategory("all")}>All Intel</button>
         </div>
-      </div>
+      </header>
 
-      <div className="news-layout">
-        <div className="distribution">
-          <Doughnut
-            data={distributionData}
-            options={{
-              plugins: { legend: { position: "bottom" } },
-              onClick: (_event, elements) => {
-                if (!elements.length) return;
-                setActiveCategory(NEWS_CATEGORIES[elements[0].index]);
-              }
-            }}
+      <div className="news-controls intel-search-row">
+        <label className="search-box">
+          <Search size={16} />
+          <input
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search intelligence feed"
           />
-          <button className="secondary-button full" onClick={() => setActiveCategory("all")}>
-            Show all articles
+        </label>
+        <select value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
+          <option value="date">Sort by date</option>
+          <option value="source">Sort by source</option>
+        </select>
+        {NEWS_CATEGORIES.map((category) => (
+          <button
+            className="secondary-button"
+            key={category}
+            onClick={() => fetchNews(category, true)}
+          >
+            <RefreshCcw size={15} /> Refresh {category}
           </button>
-        </div>
-
-        <div className="article-zone">
-          <div className="category-row">
-            {NEWS_CATEGORIES.map((category) => (
-              <button
-                key={category}
-                className={activeCategory === category ? "active" : ""}
-                onClick={() => setActiveCategory(category)}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
-          {NEWS_CATEGORIES.map((category) =>
-            newsError[category] ? (
-              <div className="error-box" key={category}>
-                <strong>{category} feed failed.</strong>
-                <p>{newsError[category]}</p>
-                <button onClick={() => fetchNews(category, true)}>Retry</button>
-              </div>
-            ) : null
-          )}
-          <div className="article-grid">
-            {Object.values(newsLoading).some(Boolean) && !visibleArticles.length
-              ? Array.from({ length: 4 }).map((_, index) => <SkeletonCard key={index} />)
-              : visibleArticles.map((article) => (
-                  <article className="article-card" key={`${article.category}-${article.url}`}>
-                    <img src={article.image || "/placeholder-news.svg"} alt="" />
-                    <div>
-                      <span className="article-meta">
-                        {article.category} / {article.source?.name || "Unknown source"}
-                      </span>
-                      <h3>{article.title}</h3>
-                      <p>{article.description || "No description available."}</p>
-                      <div className="article-footer">
-                        <time>{new Date(article.publishedAt).toLocaleDateString()}</time>
-                        <a href={article.url} target="_blank" rel="noreferrer">
-                          Read_Intel
-                        </a>
-                      </div>
-                    </div>
-                  </article>
-                ))}
-          </div>
-          <div className="refresh-row">
-            {NEWS_CATEGORIES.map((category) => (
-              <button
-                className="secondary-button"
-                key={category}
-                onClick={() => fetchNews(category, true)}
-              >
-                <RefreshCcw size={15} /> Refresh {category}
-              </button>
-            ))}
-          </div>
-        </div>
+        ))}
       </div>
+
+      {NEWS_CATEGORIES.map((category) =>
+        newsError[category] ? (
+          <div className="error-box" key={category}>
+            <strong>{category} feed failed.</strong>
+            <p>{newsError[category]}</p>
+            <button onClick={() => fetchNews(category, true)}>Retry</button>
+          </div>
+        ) : null
+      )}
+
+      {Object.values(newsLoading).some(Boolean) && !visibleArticles.length ? (
+        <div className="intel-card-grid">
+          {Array.from({ length: 3 }).map((_, index) => <SkeletonCard key={index} />)}
+        </div>
+      ) : (
+        <>
+          {visibleArticles[0] ? (
+            <article className="intel-hero-card">
+              <img src={visibleArticles[0].image || "/placeholder-news.svg"} alt="" />
+              <div>
+                <span className="critical-badge">Critical Update</span>
+                <p className="article-meta">REF_ID: {visibleArticles[0].source?.name || "GNEWS_OSINT"} / {new Date(visibleArticles[0].publishedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
+                <h3>{visibleArticles[0].title}</h3>
+                <p>{visibleArticles[0].description || "No description available."}</p>
+                <a href={visibleArticles[0].url} target="_blank" rel="noreferrer">Read_Intel</a>
+              </div>
+            </article>
+          ) : null}
+
+          <div className="intel-card-grid">
+            {visibleArticles.slice(1, 4).map((article) => (
+              <article className="intel-card" key={`${article.category}-${article.url}`}>
+                <img src={article.image || "/placeholder-news.svg"} alt="" />
+                <div>
+                  <p className="article-meta">{new Date(article.publishedAt).toLocaleDateString()} // {article.category}</p>
+                  <h3>{article.title}</h3>
+                  <p>{article.description || "No description available."}</p>
+                  <div className="article-footer">
+                    <span>{article.source?.name || "Unknown source"}</span>
+                    <a href={article.url} target="_blank" rel="noreferrer">↗</a>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+
+          {visibleArticles[4] ? (
+            <article className="anomaly-card">
+              <img src={visibleArticles[4].image || "/placeholder-news.svg"} alt="" />
+              <div>
+                <p className="article-meta">Anomaly Detected</p>
+                <h3>{visibleArticles[4].title}</h3>
+                <p>{visibleArticles[4].description || "Signal analysis is pending from the current news feed."}</p>
+                <div className="anomaly-actions">
+                  <a href={visibleArticles[4].url} target="_blank" rel="noreferrer">Analyze_Waveform</a>
+                  <button onClick={() => notify("Event logged")}>Log_Event</button>
+                </div>
+              </div>
+            </article>
+          ) : null}
+
+          <section className="telemetry-log">
+            <h3>System Telemetry Log</h3>
+            {visibleArticles.slice(0, 3).map((article, index) => (
+              <div className="log-row" key={`log-${article.url}`}>
+                <span>{["12:05", "11:58", "11:30"][index]}</span>
+                <strong>{index === 1 ? "WARNING" : index === 2 ? "INFO" : "NOMINAL"}</strong>
+                <p>{article.title}</p>
+                <em>Source: {article.source?.name || "GNEWS"}</em>
+              </div>
+            ))}
+          </section>
+        </>
+      )}
     </section>
   );
 
