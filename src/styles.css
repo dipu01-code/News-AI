@@ -639,6 +639,144 @@ p {
   color: var(--text);
 }
 
+.mission-analytics-route {
+  display: grid;
+  gap: 24px;
+}
+
+.mission-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 28px;
+}
+
+.mission-header h2 {
+  margin: 0;
+  color: var(--accent);
+  font-size: clamp(2.8rem, 6vw, 4.9rem);
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+
+.mission-header p,
+.mission-coordinates span {
+  margin: 16px 0 0;
+  color: var(--cyan);
+  font-family: "SFMono-Regular", ui-monospace, monospace;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.mission-header p span {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 14px;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 18px rgba(0, 229, 255, 0.7);
+}
+
+.mission-coordinates {
+  text-align: right;
+}
+
+.mission-coordinates strong {
+  display: block;
+  margin-top: 8px;
+  font-family: "SFMono-Regular", ui-monospace, monospace;
+  font-size: 1.3rem;
+  letter-spacing: 0.12em;
+}
+
+.mission-top-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(340px, 1fr);
+  gap: 24px;
+}
+
+.mission-chart-card,
+.mission-donut-card,
+.mission-crew-card {
+  padding: 28px;
+}
+
+.mission-chart-card {
+  min-height: 430px;
+  overflow: hidden;
+}
+
+.mission-chart-card canvas {
+  height: 300px !important;
+  max-height: 300px;
+  margin-top: 24px;
+}
+
+.mission-donut-card {
+  min-height: 430px;
+}
+
+.mission-donut {
+  display: grid;
+  place-items: center;
+  height: 300px;
+  margin-top: 18px;
+}
+
+.mission-donut canvas {
+  max-height: 280px;
+}
+
+.mission-crew-card {
+  min-height: 390px;
+}
+
+.crew-table {
+  display: grid;
+  margin-top: 28px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.crew-row {
+  display: grid;
+  grid-template-columns: 150px minmax(180px, 1fr) minmax(200px, 1fr) 100px;
+  align-items: center;
+  gap: 18px;
+  min-height: 78px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.crew-row span,
+.crew-row strong,
+.crew-row em {
+  font-family: "SFMono-Regular", ui-monospace, monospace;
+  letter-spacing: 0.08em;
+  font-style: normal;
+}
+
+.crew-head {
+  min-height: 44px;
+  color: var(--muted);
+  text-transform: uppercase;
+  font-size: 0.78rem;
+}
+
+.crew-row strong {
+  color: var(--accent);
+  font-size: 1.2rem;
+}
+
+.crew-row em {
+  display: inline-flex;
+  justify-content: center;
+  padding: 6px 10px;
+  border: 1px solid rgba(0, 229, 255, 0.35);
+  border-radius: 6px;
+  color: var(--cyan);
+  font-size: 0.76rem;
+}
+
 .stat-card {
   min-height: 180px;
   padding: 28px;
@@ -1478,8 +1616,14 @@ select {
   }
 
   .dashboard-route,
-  .dashboard-stat-row {
+  .dashboard-stat-row,
+  .mission-header,
+  .mission-top-grid {
     grid-template-columns: 1fr;
+  }
+
+  .mission-coordinates {
+    text-align: left;
   }
 
   .dashboard-feed-card,
@@ -1594,8 +1738,14 @@ select {
   }
 
   .dashboard-bottom-strip,
-  .orbit-phase-card {
+  .orbit-phase-card,
+  .crew-row {
     grid-template-columns: 1fr;
+  }
+
+  .crew-row {
+    gap: 8px;
+    padding: 16px 0;
   }
 
   .orbit-phase-card {

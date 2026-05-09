@@ -422,51 +422,71 @@ function Dashboard() {
   );
 
   const trackerPage = (
-    <section className="tracker-grid route-page">
-      <article className="command-card stat-card">
-        <span>Orbital Speed</span>
-        <strong>{Math.round(currentIss?.speed || 0).toLocaleString()}</strong>
-        <small>km/h</small>
-      </article>
-      <article className="command-card stat-card cyan">
-        <span>Altitude (MSL)</span>
-        <strong>421.4</strong>
-        <small>km</small>
-      </article>
-      <article className="command-card stat-card">
-        <span>Current Coordinates</span>
-        <p>LAT <strong>{currentIss?.lat.toFixed(4) || "--"}</strong></p>
-        <p>LON <strong>{currentIss?.lng.toFixed(4) || "--"}</strong></p>
-      </article>
-      <article className="command-card map-wrap map-console">
-        <div className="map-label">Live Tracking Active</div>
-        <h2>ISS Ground Track</h2>
-        <IssMap positions={positions.slice(-15)} current={currentIss} />
-        <button
-          className="secondary-button map-refresh"
-          onClick={() => {
-            fetchIss();
-            fetchAstros();
-            notify("ISS data refreshed");
-          }}
-        >
-          <Crosshair size={16} /> Recenter
-        </button>
-      </article>
-      <article className="command-card telemetry-feed">
+    <section className="mission-analytics-route route-page">
+      <header className="mission-header">
+        <div>
+          <h2>Mission_Analytics</h2>
+          <p><span /> System_Nominal // Encrypted_Stream_Active</p>
+        </div>
+        <div className="mission-coordinates">
+          <span>Orbit_Coordinates</span>
+          <strong>{currentIss?.lat.toFixed(4) || "--"}° N, {currentIss?.lng.toFixed(4) || "--"}° W</strong>
+        </div>
+      </header>
+
+      <div className="mission-top-grid">
+        <article className="command-card mission-chart-card">
+          <div className="section-title">
+            <div>
+              <h2>Velocity Telemetry</h2>
+              <p className="eyebrow">Measured_in_km/h // Delta-V_Variants</p>
+            </div>
+            <strong>{Math.round(currentIss?.speed || 0).toLocaleString()} km/h</strong>
+          </div>
+          <Line
+            data={speedChartData}
+            options={{
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false } },
+              scales: { y: { beginAtZero: true } }
+            }}
+          />
+        </article>
+
+        <article className="command-card mission-donut-card">
+          <p className="eyebrow">Intel_Distribution</p>
+          <h2>News Intel</h2>
+          <div className="mission-donut">
+            <Doughnut data={distributionData} options={{ plugins: { legend: { position: "bottom" } } }} />
+          </div>
+        </article>
+      </div>
+
+      <article className="command-card mission-crew-card">
         <div className="section-title">
           <div>
-            <span className="eyebrow">Breaking Telemetry</span>
-            <h2>Mission Feed</h2>
+            <h2>Astronauts Directory</h2>
+            <p className="eyebrow">Biometric_Feed_Active // Real-Time_Heart-Rate</p>
           </div>
-          <span className="realtime-badge">Real-Time</span>
+          <button className="secondary-button" onClick={fetchAstros}>Sync_Crew</button>
         </div>
-        {["Minor pressure oscillation detected in Node 3.", "EVA prep initiated for external sensor maintenance.", "Adjusted burn scheduled to avoid debris cluster.", "Protein crystal growth experiment frozen."].map((item, index) => (
-          <div className="feed-item" key={item}>
-            <span>{["System_Alpha", "Astronaut_Log", "Trajectory_Upd", "Experiment_V7"][index]}</span>
-            <p>{item}</p>
+        <div className="crew-table">
+          <div className="crew-row crew-head">
+            <span>Member_ID</span>
+            <span>Crew_Name</span>
+            <span>Mission_Role</span>
+            <span>Status</span>
           </div>
-        ))}
+          {(astros?.people || []).slice(0, 6).map((person, index) => (
+            <div className="crew-row" key={person.name}>
+              <strong>#ISS-{String(index + 1).padStart(3, "0")}</strong>
+              <span>{person.name}</span>
+              <span>{["Mission Commander", "Lead Biologist", "Systems Engineer", "Flight Specialist", "Payload Officer", "Orbital Scientist"][index % 6]}</span>
+              <em>{person.craft || "ISS"}</em>
+            </div>
+          ))}
+        </div>
       </article>
     </section>
   );
