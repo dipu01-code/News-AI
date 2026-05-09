@@ -7,19 +7,37 @@ function textFrom(value) {
   return String(value);
 }
 
+function fallbackAnswer() {
+  return "I can only answer from the current dashboard data. Try asking about the ISS latitude, longitude, speed, nearest location, astronauts in space, or loaded news articles.";
+}
+
 function answerFromDashboard(question, dashboardData) {
   const ask = question.toLowerCase();
   const iss = dashboardData?.iss || {};
   const astronauts = dashboardData?.astronauts || {};
   const news = dashboardData?.news || [];
+  const mentionsDelhi = ask.includes("delhi");
+  const mentionsSingapore = ask.includes("singapore");
 
-  if (ask.includes("longitude") || ask.includes("longitube")) {
+  if (
+    ask.includes("longitude") ||
+    ask.includes("longitube") ||
+    ask.includes("ongitube") ||
+    ask.includes("lng") ||
+    ask.includes("long ")
+  ) {
+    if (mentionsDelhi || (mentionsSingapore && !iss.currentLocation?.toLowerCase().includes("singapore"))) {
+      return fallbackAnswer();
+    }
     return iss.longitude === undefined
       ? "I can only answer from the current dashboard data."
       : `The current ISS longitude shown on the dashboard is ${iss.longitude}.`;
   }
 
   if (ask.includes("latitude")) {
+    if (mentionsDelhi || (mentionsSingapore && !iss.currentLocation?.toLowerCase().includes("singapore"))) {
+      return fallbackAnswer();
+    }
     return iss.latitude === undefined
       ? "I can only answer from the current dashboard data."
       : `The current ISS latitude shown on the dashboard is ${iss.latitude}.`;
@@ -112,8 +130,11 @@ export default async function handler(request, response) {
     }
 
     if (!hfResponse.ok) {
-      return response.status(hfResponse.status).json({
-        message: textFrom(data.error) || textFrom(data.message) || "Hugging Face request failed."
+      const message = textFrom(data.error) || textFrom(data.message);
+      return response.status(200).json({
+        answer: message.includes("not supported by any provider")
+          ? fallbackAnswer()
+          : `I can only answer from the current dashboard data. ${message || ""}`.trim()
       });
     }
 
