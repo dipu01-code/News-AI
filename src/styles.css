@@ -799,6 +799,7 @@ select {
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(340px, 1fr);
   gap: 20px;
+  align-items: start;
 }
 
 .chart-panel,
@@ -808,8 +809,15 @@ select {
   padding: 28px;
 }
 
+.analytics-grid .chart-panel,
+.analytics-grid .analytics-distribution {
+  height: min(620px, calc(100vh - 150px));
+  min-height: 480px;
+  overflow: hidden;
+}
+
 .analytics-distribution canvas {
-  max-height: 310px;
+  max-height: 280px;
   margin-top: 28px;
 }
 
@@ -820,7 +828,14 @@ select {
 
 .chart-panel canvas {
   margin-top: 24px;
-  min-height: 320px;
+  height: 320px !important;
+  max-height: 320px;
+}
+
+.analytics-grid .chart-panel canvas {
+  height: min(430px, calc(100vh - 290px)) !important;
+  max-height: 430px;
+  min-height: 260px;
 }
 
 .big-number {
