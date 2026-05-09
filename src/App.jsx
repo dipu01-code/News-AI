@@ -338,51 +338,85 @@ function Dashboard() {
   }
 
   const dashboardPage = (
-    <section className="hero-console route-page">
-      <div className="orbital-globe" />
-      <div className="station-clock">
-        <span>Station_Time_UTC</span>
-        <strong>{currentIss?.time || "--:--:--"}</strong>
+    <section className="dashboard-route route-page">
+      <div className="dashboard-stat-row">
+        <article className="command-card stat-card">
+          <span>Orbital Speed</span>
+          <strong>{Math.round(currentIss?.speed || 0).toLocaleString()}</strong>
+          <small>km/h</small>
+        </article>
+        <article className="command-card stat-card cyan">
+          <span>Altitude (MSL)</span>
+          <strong>421.4</strong>
+          <small>km</small>
+        </article>
+        <article className="command-card stat-card coordinate-stat">
+          <span>Current Coordinates</span>
+          {issLoading ? (
+            <small>Awaiting signal...</small>
+          ) : issError ? (
+            <button className="secondary-button" onClick={fetchIss}>Retry signal</button>
+          ) : (
+            <>
+              <p>LAT <strong>{currentIss?.lat.toFixed(4) || "--"}</strong></p>
+              <p>LON <strong>{currentIss?.lng.toFixed(4) || "--"}</strong></p>
+            </>
+          )}
+        </article>
       </div>
 
-      <article className="command-card coordinates-card">
-        <span className="eyebrow">Current Coordinates</span>
-        <h2>ISS_ALPHA_V4</h2>
-        {issLoading ? (
-          <SkeletonCard />
-        ) : issError ? (
-          <div className="error-box compact">
-            <strong>Signal interrupted.</strong>
-            <p>{issError}</p>
-            <button onClick={fetchIss}>Retry</button>
+      <article className="command-card dashboard-map-card">
+        <div className="map-label">Live Tracking Active</div>
+        <h2>ISS Ground Track</h2>
+        <IssMap positions={positions.slice(-15)} current={currentIss} />
+        <div className="orbit-phase-card">
+          <div>
+            <span>Orbit Phase</span>
+            <strong>Equatorial Crossing</strong>
           </div>
-        ) : (
-          <div className="coordinate-pair">
-            <div>
-              <span>Latitude</span>
-              <strong>{currentIss?.lat.toFixed(4)} N</strong>
-            </div>
-            <div>
-              <span>Longitude</span>
-              <strong>{currentIss?.lng.toFixed(4)} W</strong>
-            </div>
+          <div>
+            <span>Inclination</span>
+            <strong>51.64°</strong>
           </div>
-        )}
-      </article>
-
-      <article className="command-card telemetry-card">
-        <div><span>Velocity</span><strong>{Math.round(currentIss?.speed || 0).toLocaleString()} km/h</strong></div>
-        <div><span>Nadir Point</span><strong>{currentIss?.place || "Awaiting signal"}</strong></div>
-        <div><span>Positions</span><strong>{positions.slice(-15).length} tracked</strong></div>
-      </article>
-
-      <button className="mission-button"><Rocket size={22} /> Mission_Abort</button>
-      <div className="telemetry-link">
-        <RefreshCcw size={20} />
-        <div>
-          <span>Telemetry link: nominal</span>
-          <strong>Next sync: 0.8s</strong>
         </div>
+        <button
+          className="secondary-button map-refresh"
+          onClick={() => {
+            fetchIss();
+            fetchAstros();
+            notify("ISS data refreshed");
+          }}
+        >
+          <Crosshair size={16} /> Recenter
+        </button>
+      </article>
+
+      <article className="command-card dashboard-feed-card">
+        <div className="section-title">
+          <div>
+            <p className="eyebrow">Breaking Telemetry</p>
+            <h2>Mission Feed</h2>
+          </div>
+          <span className="realtime-badge">Real-Time</span>
+        </div>
+        {[
+          ["System_Alpha", "Minor pressure oscillation detected in Node 3. Systems recalibrating autonomously."],
+          ["Astronaut_Log", `${astros?.number ?? 0} crew active. External sensor maintenance queue nominal.`],
+          ["Trajectory_Upd", currentIss?.place ? `Nadir point currently near ${currentIss.place}.` : "Trajectory signal pending."],
+          ["Experiment_V7", "Protein crystal growth experiment successfully frozen. Ready for sample extraction."]
+        ].map(([label, item]) => (
+          <div className="feed-item" key={label}>
+            <span>{label}</span>
+            <p>{item}</p>
+          </div>
+        ))}
+      </article>
+
+      <div className="dashboard-bottom-strip">
+        <span>Nadir Point: <strong>{currentIss?.place || "Awaiting signal"}</strong></span>
+        <span>Orbital Sunrise In: <strong>00:24:12</strong></span>
+        <span>{astros?.number ?? 0} Crew Active</span>
+        <span>Comms Link: Solid</span>
       </div>
     </section>
   );
