@@ -1,6 +1,7 @@
 export default async function handler(request, response) {
   const apiKey = process.env.VITE_GNEWS_API_KEY;
   const category = request.query?.category || "science";
+  const isRefresh = Boolean(request.query?.refresh);
 
   if (!apiKey) {
     return response.status(500).json({ message: "Missing GNews API key." });
@@ -11,10 +12,12 @@ export default async function handler(request, response) {
       category,
       lang: "en",
       country: "us",
-      max: "5",
+      max: "10",
       apikey: apiKey
     });
-    const upstream = await fetch(`https://gnews.io/api/v4/top-headlines?${params}`);
+    const upstream = await fetch(`https://gnews.io/api/v4/top-headlines?${params}`, {
+      cache: isRefresh ? "no-store" : "default"
+    });
     const data = await upstream.json();
 
     if (!upstream.ok) {
@@ -23,7 +26,10 @@ export default async function handler(request, response) {
       });
     }
 
-    response.setHeader("Cache-Control", "s-maxage=120, stale-while-revalidate=300");
+    response.setHeader(
+      "Cache-Control",
+      isRefresh ? "no-store, max-age=0" : "s-maxage=120, stale-while-revalidate=300"
+    );
     return response.status(200).json(data);
   } catch (error) {
     return response.status(500).json({

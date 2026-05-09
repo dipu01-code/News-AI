@@ -127,7 +127,7 @@ function devApiPlugin(env) {
               category,
               lang: "en",
               country: "us",
-              max: "5",
+              max: "10",
               apikey: apiKey
             });
             const upstream = await fetch(`https://gnews.io/api/v4/top-headlines?${params}`);

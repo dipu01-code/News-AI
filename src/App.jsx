@@ -220,16 +220,26 @@ function Dashboard() {
     setNewsLoading((items) => ({ ...items, [category]: true }));
     setNewsError((items) => ({ ...items, [category]: "" }));
     try {
-      const response = await fetch(`/api/news?category=${encodeURIComponent(category)}`);
+      const refreshKey = `gnews_refresh_${category}`;
+      const refreshCount = force ? Number(localStorage.getItem(refreshKey) || "0") + 1 : 0;
+      if (force) localStorage.setItem(refreshKey, String(refreshCount));
+
+      const params = new URLSearchParams({ category });
+      if (force) params.set("refresh", `${Date.now()}`);
+      const response = await fetch(`/api/news?${params.toString()}`, {
+        cache: force ? "no-store" : "default"
+      });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "News request failed.");
-      const normalized = (data.articles || []).slice(0, 5).map((article) => ({
+      const normalized = (data.articles || []).map((article) => ({
         ...article,
         category,
         author: article.source?.name || "Editorial Desk"
       }));
-      setCached(cacheKey, normalized);
-      setNewsByCategory((items) => ({ ...items, [category]: normalized }));
+      const offset = force && normalized.length > 5 ? (refreshCount * 5) % normalized.length : 0;
+      const rotated = [...normalized.slice(offset), ...normalized.slice(0, offset)].slice(0, 5);
+      setCached(cacheKey, rotated);
+      setNewsByCategory((items) => ({ ...items, [category]: rotated }));
       notify(`${category} news refreshed`);
     } catch (error) {
       setNewsError((items) => ({ ...items, [category]: error.message }));
