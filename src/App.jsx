@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Navigate, NavLink, Route, Routes } from "react-router-dom";
 import {
   Activity,
   AlertTriangle,
@@ -326,6 +327,256 @@ function Dashboard() {
     }
   }
 
+  const dashboardPage = (
+    <section className="hero-console route-page">
+      <div className="orbital-globe" />
+      <div className="station-clock">
+        <span>Station_Time_UTC</span>
+        <strong>{currentIss?.time || "--:--:--"}</strong>
+      </div>
+
+      <article className="command-card coordinates-card">
+        <span className="eyebrow">Current Coordinates</span>
+        <h2>ISS_ALPHA_V4</h2>
+        {issLoading ? (
+          <SkeletonCard />
+        ) : issError ? (
+          <div className="error-box compact">
+            <strong>Signal interrupted.</strong>
+            <p>{issError}</p>
+            <button onClick={fetchIss}>Retry</button>
+          </div>
+        ) : (
+          <div className="coordinate-pair">
+            <div>
+              <span>Latitude</span>
+              <strong>{currentIss?.lat.toFixed(4)} N</strong>
+            </div>
+            <div>
+              <span>Longitude</span>
+              <strong>{currentIss?.lng.toFixed(4)} W</strong>
+            </div>
+          </div>
+        )}
+      </article>
+
+      <article className="command-card telemetry-card">
+        <div><span>Velocity</span><strong>{Math.round(currentIss?.speed || 0).toLocaleString()} km/h</strong></div>
+        <div><span>Nadir Point</span><strong>{currentIss?.place || "Awaiting signal"}</strong></div>
+        <div><span>Positions</span><strong>{positions.slice(-15).length} tracked</strong></div>
+      </article>
+
+      <button className="mission-button"><Rocket size={22} /> Mission_Abort</button>
+      <div className="telemetry-link">
+        <RefreshCcw size={20} />
+        <div>
+          <span>Telemetry link: nominal</span>
+          <strong>Next sync: 0.8s</strong>
+        </div>
+      </div>
+    </section>
+  );
+
+  const trackerPage = (
+    <section className="tracker-grid route-page">
+      <article className="command-card stat-card">
+        <span>Orbital Speed</span>
+        <strong>{Math.round(currentIss?.speed || 0).toLocaleString()}</strong>
+        <small>km/h</small>
+      </article>
+      <article className="command-card stat-card cyan">
+        <span>Altitude (MSL)</span>
+        <strong>421.4</strong>
+        <small>km</small>
+      </article>
+      <article className="command-card stat-card">
+        <span>Current Coordinates</span>
+        <p>LAT <strong>{currentIss?.lat.toFixed(4) || "--"}</strong></p>
+        <p>LON <strong>{currentIss?.lng.toFixed(4) || "--"}</strong></p>
+      </article>
+      <article className="command-card map-wrap map-console">
+        <div className="map-label">Live Tracking Active</div>
+        <h2>ISS Ground Track</h2>
+        <IssMap positions={positions.slice(-15)} current={currentIss} />
+        <button
+          className="secondary-button map-refresh"
+          onClick={() => {
+            fetchIss();
+            fetchAstros();
+            notify("ISS data refreshed");
+          }}
+        >
+          <Crosshair size={16} /> Recenter
+        </button>
+      </article>
+      <article className="command-card telemetry-feed">
+        <div className="section-title">
+          <div>
+            <span className="eyebrow">Breaking Telemetry</span>
+            <h2>Mission Feed</h2>
+          </div>
+          <span className="realtime-badge">Real-Time</span>
+        </div>
+        {["Minor pressure oscillation detected in Node 3.", "EVA prep initiated for external sensor maintenance.", "Adjusted burn scheduled to avoid debris cluster.", "Protein crystal growth experiment frozen."].map((item, index) => (
+          <div className="feed-item" key={item}>
+            <span>{["System_Alpha", "Astronaut_Log", "Trajectory_Upd", "Experiment_V7"][index]}</span>
+            <p>{item}</p>
+          </div>
+        ))}
+      </article>
+    </section>
+  );
+
+  const newsPage = (
+    <section className="command-card news-panel route-page">
+      <div className="section-title news-title">
+        <div>
+          <p className="eyebrow">Orbital Intelligence</p>
+          <h2>News Hub</h2>
+        </div>
+        <div className="news-controls">
+          <label className="search-box">
+            <Search size={16} />
+            <input
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search intel"
+            />
+          </label>
+          <select value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
+            <option value="date">Sort by date</option>
+            <option value="source">Sort by source</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="news-layout">
+        <div className="distribution">
+          <Doughnut
+            data={distributionData}
+            options={{
+              plugins: { legend: { position: "bottom" } },
+              onClick: (_event, elements) => {
+                if (!elements.length) return;
+                setActiveCategory(NEWS_CATEGORIES[elements[0].index]);
+              }
+            }}
+          />
+          <button className="secondary-button full" onClick={() => setActiveCategory("all")}>
+            Show all articles
+          </button>
+        </div>
+
+        <div className="article-zone">
+          <div className="category-row">
+            {NEWS_CATEGORIES.map((category) => (
+              <button
+                key={category}
+                className={activeCategory === category ? "active" : ""}
+                onClick={() => setActiveCategory(category)}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+          {NEWS_CATEGORIES.map((category) =>
+            newsError[category] ? (
+              <div className="error-box" key={category}>
+                <strong>{category} feed failed.</strong>
+                <p>{newsError[category]}</p>
+                <button onClick={() => fetchNews(category, true)}>Retry</button>
+              </div>
+            ) : null
+          )}
+          <div className="article-grid">
+            {Object.values(newsLoading).some(Boolean) && !visibleArticles.length
+              ? Array.from({ length: 4 }).map((_, index) => <SkeletonCard key={index} />)
+              : visibleArticles.map((article) => (
+                  <article className="article-card" key={`${article.category}-${article.url}`}>
+                    <img src={article.image || "/placeholder-news.svg"} alt="" />
+                    <div>
+                      <span className="article-meta">
+                        {article.category} / {article.source?.name || "Unknown source"}
+                      </span>
+                      <h3>{article.title}</h3>
+                      <p>{article.description || "No description available."}</p>
+                      <div className="article-footer">
+                        <time>{new Date(article.publishedAt).toLocaleDateString()}</time>
+                        <a href={article.url} target="_blank" rel="noreferrer">
+                          Read_Intel
+                        </a>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+          </div>
+          <div className="refresh-row">
+            {NEWS_CATEGORIES.map((category) => (
+              <button
+                className="secondary-button"
+                key={category}
+                onClick={() => fetchNews(category, true)}
+              >
+                <RefreshCcw size={15} /> Refresh {category}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+
+  const analyticsPage = (
+    <section className="analytics-grid route-page">
+      <article className="command-card chart-panel">
+        <div className="section-title">
+          <div>
+            <p className="eyebrow">Measured in km/h // Delta variants</p>
+            <h2>Velocity Telemetry</h2>
+          </div>
+          <strong>{Math.round(currentIss?.speed || 0).toLocaleString()} km/h</strong>
+        </div>
+        <Line
+          data={speedChartData}
+          options={{
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true } }
+          }}
+        />
+      </article>
+      <article className="command-card analytics-distribution">
+        <div className="section-title">
+          <div>
+            <p className="eyebrow">Intel Distribution</p>
+            <h2>News Intel</h2>
+          </div>
+        </div>
+        <Doughnut data={distributionData} options={{ plugins: { legend: { position: "bottom" } } }} />
+      </article>
+    </section>
+  );
+
+  const astronautsPage = (
+    <section className="route-page astronauts-route">
+      <article className="command-card people-panel">
+        <div className="section-title">
+          <div>
+            <p className="eyebrow">Biometric feed active</p>
+            <h2>Astronauts Directory</h2>
+          </div>
+          <strong className="big-number">{astros?.number ?? "..."}</strong>
+        </div>
+        <div className="chips crew-list">
+          {(astros?.people || []).map((person, index) => (
+            <span key={person.name}>#ISS-{String(index + 1).padStart(3, "0")} / {person.name}</span>
+          ))}
+        </div>
+      </article>
+    </section>
+  );
+
   return (
     <main className="app-shell command-shell">
       <Toasts toasts={toasts} />
@@ -335,10 +586,10 @@ function Dashboard() {
           <span>LV_TRACKER_V.9</span>
         </div>
         <nav className="top-nav" aria-label="Primary">
-          <a href="#dashboard">Dashboard</a>
-          <a href="#tracker" className="active">Live Tracker</a>
-          <a href="#intel">News Hub</a>
-          <a href="#analytics">Analytics</a>
+          <NavLink to="/" end>Dashboard</NavLink>
+          <NavLink to="/tracker">Live Tracker</NavLink>
+          <NavLink to="/news">News Hub</NavLink>
+          <NavLink to="/analytics">Analytics</NavLink>
         </nav>
         <div className="top-actions">
           <Wifi size={22} />
@@ -360,15 +611,25 @@ function Dashboard() {
             <strong>STATION_CMD</strong>
             <span>ISS-ALPHA_V4</span>
           </div>
-          <a href="#dashboard" className="nav-item active"><Grid2X2 size={20} /> Dashboard</a>
-          <a href="#tracker" className="nav-item"><Satellite size={20} /> Live Tracker</a>
-          <a href="#intel" className="nav-item"><Radio size={20} /> News Hub</a>
-          <a href="#analytics" className="nav-item"><BarChart3 size={20} /> Analytics</a>
-          <a href="#crew" className="nav-item"><Users size={20} /> Astronauts</a>
+          <NavLink to="/" end className="nav-item"><Grid2X2 size={20} /> <span>Dashboard</span></NavLink>
+          <NavLink to="/tracker" className="nav-item"><Satellite size={20} /> <span>Live Tracker</span></NavLink>
+          <NavLink to="/news" className="nav-item"><Radio size={20} /> <span>News Hub</span></NavLink>
+          <NavLink to="/analytics" className="nav-item"><BarChart3 size={20} /> <span>Analytics</span></NavLink>
+          <NavLink to="/astronauts" className="nav-item"><Users size={20} /> <span>Astronauts</span></NavLink>
           <button className="emergency-button"><AlertTriangle size={16} /> Emergency_Vent</button>
         </aside>
 
         <div className="command-main">
+          <Routes>
+            <Route path="/" element={dashboardPage} />
+            <Route path="/tracker" element={trackerPage} />
+            <Route path="/news" element={newsPage} />
+            <Route path="/analytics" element={analyticsPage} />
+            <Route path="/astronauts" element={astronautsPage} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+          {false && (
+            <>
           <section id="dashboard" className="hero-console">
             <div className="orbital-globe" />
             <div className="station-clock">
@@ -596,6 +857,8 @@ function Dashboard() {
               </div>
             </article>
           </section>
+            </>
+          )}
         </div>
       </div>
 

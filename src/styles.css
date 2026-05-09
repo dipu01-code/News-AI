@@ -283,6 +283,21 @@ p {
   padding: 28px 30px 80px;
 }
 
+.route-page {
+  animation: routeIn 0.28s ease-out;
+}
+
+@keyframes routeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .command-card,
 .panel {
   position: relative;
@@ -651,7 +666,7 @@ p {
 
 .news-panel,
 .analytics-grid {
-  margin-top: 30px;
+  margin-top: 0;
 }
 
 .news-panel {
@@ -787,9 +802,20 @@ select {
 }
 
 .chart-panel,
-.people-panel {
+.people-panel,
+.analytics-distribution {
   min-height: 420px;
   padding: 28px;
+}
+
+.analytics-distribution canvas {
+  max-height: 310px;
+  margin-top: 28px;
+}
+
+.astronauts-route {
+  display: grid;
+  gap: 20px;
 }
 
 .chart-panel canvas {
