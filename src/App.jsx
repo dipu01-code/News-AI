@@ -422,111 +422,63 @@ function Dashboard() {
   );
 
   const trackerPage = (
-    <section className="mission-analytics-route route-page">
-      <header className="mission-header">
-        <div>
-          <h2>Mission_Analytics</h2>
-          <p><span /> System_Nominal // Encrypted_Stream_Active</p>
-        </div>
-        <div className="mission-coordinates">
-          <span>Orbit_Coordinates</span>
-          <strong>{currentIss?.lat.toFixed(4) || "--"}° N, {currentIss?.lng.toFixed(4) || "--"}° W</strong>
-        </div>
-      </header>
-
-      <div className="mission-top-grid">
-        <article className="command-card mission-chart-card">
-          <div className="section-title">
-            <div>
-              <h2>Velocity Telemetry</h2>
-              <p className="eyebrow">Measured_in_km/h // Delta-V_Variants</p>
-            </div>
-            <strong>{Math.round(currentIss?.speed || 0).toLocaleString()} km/h</strong>
-          </div>
-          <Line
-            data={speedChartData}
-            options={{
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: { legend: { display: false } },
-              scales: { y: { beginAtZero: true } }
-            }}
-          />
-        </article>
-
-        <article className="command-card mission-donut-card">
-          <div className="intel-module-head">
-            <div>
-              <p className="eyebrow">Intel_Distribution</p>
-              <h2>News Intel</h2>
-            </div>
-            <span>{articles.length || 0} live</span>
-          </div>
-          <div className="mission-donut">
-            <Doughnut
-              data={distributionData}
-              options={{
-                cutout: "68%",
-                plugins: { legend: { display: false } }
-              }}
-            />
-            <div className="donut-core">
-              <strong>{articles.length || 0}</strong>
-              <span>Events</span>
-            </div>
-          </div>
-          <div className="intel-breakdown">
-            {NEWS_CATEGORIES.map((category, index) => {
-              const count = newsByCategory[category]?.length || 0;
-              const percent = articles.length ? Math.round((count / articles.length) * 100) : 0;
-              return (
-                <button
-                  key={category}
-                  className={activeCategory === category ? "active" : ""}
-                  onClick={() => setActiveCategory(category)}
-                >
-                  <i className={index === 0 ? "science-dot" : "tech-dot"} />
-                  <span>{category}</span>
-                  <strong>{count}</strong>
-                  <em>{percent}%</em>
-                </button>
-              );
-            })}
-          </div>
-          <div className="intel-module-actions">
-            <button onClick={() => setActiveCategory("all")}>All_Intel</button>
-            <button onClick={() => NEWS_CATEGORIES.forEach((category) => fetchNews(category, true))}>
-              Refresh_Feed
-            </button>
-          </div>
-        </article>
+    <section className="orbital-tracker-route route-page">
+      <div className="tracker-border" />
+      <div className="orbital-earth-scene">
+        <IssMap positions={positions.slice(-15)} current={currentIss} />
+        <div className="earth-visual" />
+        <div className="orbit-path" />
+        <div className="shuttle-glow" />
+        <div className="satellite-node" />
       </div>
 
-      <article className="command-card mission-crew-card">
-        <div className="section-title">
+      <div className="station-clock tracker-clock">
+        <span>Station_Time_UTC</span>
+        <strong>{currentIss?.time || "--:--:--"}</strong>
+      </div>
+
+      <article className="command-card tracker-coordinates-panel">
+        <p className="eyebrow">Current Coordinates</p>
+        <h2>ISS_ALPHA_V4</h2>
+        <div className="coordinate-pair">
           <div>
-            <h2>Astronauts Directory</h2>
-            <p className="eyebrow">Biometric_Feed_Active // Real-Time_Heart-Rate</p>
+            <span>Latitude</span>
+            <strong>{currentIss?.lat.toFixed(4) || "--"}° N</strong>
           </div>
-          <button className="secondary-button" onClick={fetchAstros}>Sync_Crew</button>
-        </div>
-        <div className="crew-table">
-          <div className="crew-row crew-head">
-            <span>Member_ID</span>
-            <span>Crew_Name</span>
-            <span>Mission_Role</span>
-            <span>Status</span>
+          <div>
+            <span>Longitude</span>
+            <strong>{currentIss?.lng.toFixed(4) || "--"}° W</strong>
           </div>
-          {(astros?.people || []).slice(0, 6).map((person, index) => (
-            <div className="crew-row" key={person.name}>
-              <strong>#ISS-{String(index + 1).padStart(3, "0")}</strong>
-              <span>{person.name}</span>
-              <span>{["Mission Commander", "Lead Biologist", "Systems Engineer", "Flight Specialist", "Payload Officer", "Orbital Scientist"][index % 6]}</span>
-              <em>{person.craft || "ISS"}</em>
-            </div>
-          ))}
         </div>
       </article>
+
+      <article className="command-card tracker-telemetry-panel">
+        <div><span>Velocity</span><strong>{Math.round(currentIss?.speed || 0).toLocaleString()} km/h</strong></div>
+        <div><span>Nadir Point</span><strong>{currentIss?.place || "Awaiting signal"}</strong></div>
+        <div><span>Altitude</span><strong>420.5 km</strong></div>
+      </article>
+
+      <div className="tracker-telemetry-link">
+        <RefreshCcw size={22} />
+        <div>
+          <span>Telemetry link: nominal</span>
+          <strong>Next sync: 0.8s</strong>
+        </div>
+      </div>
+
+      <button className="mission-button tracker-mission-button"><Rocket size={22} /> Mission_Abort</button>
+
+      <div className="tracker-controls">
+        <button>+</button>
+        <button>-</button>
+        <button onClick={() => {
+          fetchIss();
+          fetchAstros();
+          notify("ISS data refreshed");
+        }}><Crosshair size={22} /></button>
+      </div>
+
+      <button className="toggle-orbit-button">Toggle_Orbit</button>
     </section>
   );
 

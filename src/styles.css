@@ -909,6 +909,276 @@ p {
   font-size: 0.76rem;
 }
 
+.orbital-tracker-route {
+  position: relative;
+  min-height: calc(100vh - 136px);
+  overflow: hidden;
+  border: 1px solid rgba(220, 177, 255, 0.12);
+  background:
+    radial-gradient(circle at 56% 50%, rgba(0, 229, 255, 0.12), transparent 38rem),
+    linear-gradient(160deg, rgba(3, 5, 12, 0.96), rgba(2, 3, 8, 0.98));
+}
+
+.tracker-border {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  pointer-events: none;
+  border: 2px solid rgba(220, 177, 255, 0.18);
+  clip-path: polygon(0 0, 36px 0, 36px 2px, 2px 2px, 2px calc(100% - 36px), 36px calc(100% - 36px), 36px 100%, 0 100%, 0 0, calc(100% - 36px) 0, 100% 0, 100% 36px, calc(100% - 36px) 36px, calc(100% - 36px) 2px);
+}
+
+.orbital-earth-scene {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.orbital-earth-scene .map-panel {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  min-height: 100%;
+  border-radius: 0;
+  opacity: 0.18;
+  filter: saturate(0.45) hue-rotate(35deg) brightness(0.38) contrast(1.35);
+}
+
+.earth-visual {
+  position: absolute;
+  left: 16%;
+  bottom: -36%;
+  z-index: 1;
+  width: min(82vw, 1080px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 38% 20%, rgba(255, 255, 255, 0.6), transparent 4%),
+    radial-gradient(circle at 58% 25%, rgba(166, 213, 224, 0.25), transparent 21%),
+    radial-gradient(circle at 44% 46%, rgba(20, 56, 84, 0.14), rgba(0, 0, 0, 0.88) 64%),
+    linear-gradient(135deg, rgba(117, 196, 221, 0.32), rgba(0, 0, 0, 0.97));
+  box-shadow:
+    inset 34px 18px 70px rgba(150, 223, 255, 0.2),
+    inset -130px -72px 160px rgba(0, 0, 0, 0.9),
+    0 0 90px rgba(0, 229, 255, 0.2);
+  opacity: 0.92;
+}
+
+.earth-visual::before {
+  position: absolute;
+  inset: 13%;
+  content: "";
+  border-radius: 50%;
+  background:
+    linear-gradient(35deg, transparent 36%, rgba(255, 255, 255, 0.13) 37%, transparent 39%),
+    radial-gradient(circle at 73% 34%, rgba(255, 220, 150, 0.32), transparent 2%),
+    radial-gradient(circle at 67% 42%, rgba(255, 220, 150, 0.23), transparent 1.4%),
+    radial-gradient(circle at 51% 62%, rgba(255, 220, 150, 0.18), transparent 1.2%);
+  opacity: 0.58;
+}
+
+.orbit-path {
+  position: absolute;
+  left: -11%;
+  top: 38%;
+  z-index: 3;
+  width: 124%;
+  height: 36%;
+  border-top: 3px dashed rgba(0, 229, 255, 0.78);
+  border-radius: 50%;
+  transform: rotate(14deg);
+}
+
+.shuttle-glow {
+  position: absolute;
+  left: 46%;
+  top: 55%;
+  z-index: 4;
+  width: 94px;
+  height: 18px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, rgba(220, 177, 255, 0.96));
+  box-shadow: 0 0 28px rgba(220, 177, 255, 0.7);
+}
+
+.shuttle-glow::after {
+  position: absolute;
+  right: -22px;
+  top: -10px;
+  content: "";
+  width: 56px;
+  height: 32px;
+  background: var(--accent);
+  clip-path: polygon(0 34%, 68% 34%, 68% 0, 100% 50%, 68% 100%, 68% 66%, 0 66%);
+  filter: drop-shadow(0 0 18px rgba(220, 177, 255, 0.8));
+}
+
+.satellite-node {
+  position: absolute;
+  right: 30%;
+  top: 48%;
+  z-index: 5;
+  width: 58px;
+  height: 58px;
+  border: 1px solid rgba(220, 177, 255, 0.58);
+  border-radius: 50%;
+  background: rgba(12, 8, 20, 0.55);
+  box-shadow: 0 0 0 18px rgba(220, 177, 255, 0.08);
+}
+
+.satellite-node::after {
+  position: absolute;
+  inset: 18px;
+  content: "";
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.tracker-clock {
+  z-index: 6;
+}
+
+.tracker-coordinates-panel,
+.tracker-telemetry-panel {
+  position: absolute;
+  left: 40px;
+  z-index: 6;
+  width: min(420px, calc(100% - 80px));
+  padding: 28px;
+  backdrop-filter: blur(18px);
+}
+
+.tracker-coordinates-panel {
+  top: 40px;
+}
+
+.tracker-coordinates-panel h2 {
+  margin: 12px 0 26px;
+  color: var(--accent);
+  font-size: 2rem;
+}
+
+.tracker-telemetry-panel {
+  top: 265px;
+}
+
+.tracker-telemetry-panel div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  min-height: 58px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tracker-telemetry-panel div:last-child {
+  border-bottom: 0;
+}
+
+.tracker-telemetry-panel span {
+  color: var(--muted);
+  font-family: "SFMono-Regular", ui-monospace, monospace;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.tracker-telemetry-panel strong {
+  max-width: 60%;
+  color: #ffc6ae;
+  font-family: "SFMono-Regular", ui-monospace, monospace;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.tracker-telemetry-link {
+  position: absolute;
+  left: 40px;
+  bottom: 36px;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: min(450px, calc(100% - 80px));
+  min-height: 90px;
+  padding: 18px 22px;
+  border: 1px solid var(--line-strong);
+  border-left: 4px solid var(--cyan);
+  border-radius: 12px;
+  background: rgba(18, 13, 25, 0.82);
+  backdrop-filter: blur(18px);
+}
+
+.tracker-telemetry-link svg {
+  color: var(--cyan);
+}
+
+.tracker-telemetry-link span,
+.tracker-telemetry-link strong {
+  display: block;
+  font-family: "SFMono-Regular", ui-monospace, monospace;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.tracker-telemetry-link span {
+  color: var(--cyan);
+}
+
+.tracker-telemetry-link strong {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.tracker-mission-button {
+  z-index: 6;
+  bottom: 48px;
+}
+
+.tracker-controls {
+  position: absolute;
+  right: 40px;
+  bottom: 110px;
+  z-index: 6;
+  display: grid;
+  gap: 10px;
+  width: 150px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(18, 13, 25, 0.82);
+  backdrop-filter: blur(18px);
+}
+
+.tracker-controls button,
+.toggle-orbit-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50px;
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.045);
+  color: var(--text);
+  font-size: 1.8rem;
+}
+
+.tracker-controls button:last-child {
+  color: var(--orange);
+}
+
+.toggle-orbit-button {
+  position: absolute;
+  right: 40px;
+  bottom: 36px;
+  z-index: 6;
+  width: 150px;
+  color: var(--orange);
+  font-family: "SFMono-Regular", ui-monospace, monospace;
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .stat-card {
   min-height: 180px;
   padding: 28px;
@@ -1863,6 +2133,52 @@ select {
     min-width: 0;
     margin: 20px 16px 0;
     transform: none;
+  }
+
+  .orbital-tracker-route {
+    min-height: 760px;
+  }
+
+  .tracker-coordinates-panel,
+  .tracker-telemetry-panel,
+  .tracker-telemetry-link,
+  .tracker-controls,
+  .toggle-orbit-button {
+    position: relative;
+    inset: auto;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    top: auto;
+    width: calc(100% - 32px);
+    margin: 16px;
+  }
+
+  .tracker-mission-button {
+    position: relative;
+    left: auto;
+    bottom: auto;
+    width: calc(100% - 32px);
+    margin: 16px;
+    transform: none;
+  }
+
+  .tracker-clock {
+    position: relative;
+    margin: 16px;
+    text-align: left;
+  }
+
+  .earth-visual {
+    left: 8%;
+    bottom: -12%;
+    width: 110vw;
+  }
+
+  .orbit-path,
+  .shuttle-glow,
+  .satellite-node {
+    display: none;
   }
 
   .dashboard-route {
